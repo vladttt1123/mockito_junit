@@ -1,0 +1,53 @@
+package com.mockitotutorial.happyhotel.booking;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+public class Test04MultipleThenReturnCalls {
+    private BookingService bookingService;
+    private PaymentService paymentServiceMock;
+    private RoomService roomServiceMock;
+    private BookingDAO bookingDAOMock;
+    private MailSender mailSenderMock;
+
+    //initialize the field in the set up method
+    @BeforeEach
+    void setup(){
+        this.paymentServiceMock = mock(PaymentService.class);
+        this.roomServiceMock = mock(RoomService.class);
+        this.bookingDAOMock = mock(BookingDAO.class);
+        this.mailSenderMock = mock(MailSender.class);
+
+        this.bookingService = new BookingService(paymentServiceMock,roomServiceMock,bookingDAOMock,mailSenderMock);
+
+
+    }
+
+    @Test
+    void should_CountAvailablePlaces_When_CalledMultipleTimes() {
+        //given teach the mock to return list with 1 room when getAvailabelRooms Method is called
+        when(this.roomServiceMock.getAvailableRooms())
+                .thenReturn(Collections.singletonList(new Room("Room 1", 5)))
+                .thenReturn(Collections.emptyList());
+        int expectedFistCall = 5;
+        int expectedSecondCall = 0;
+        //when
+        int actualFirst = bookingService.getAvailablePlaceCount();
+        int actualSecond = bookingService.getAvailablePlaceCount();
+
+        //then
+        assertAll(
+                () -> assertEquals(expectedFistCall, actualFirst),
+                () -> assertEquals(expectedSecondCall, actualSecond));
+
+
+    }
+}
